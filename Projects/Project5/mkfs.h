@@ -3,6 +3,6 @@
 #define TOTAL_BLOCKS 1024
 #define PREALLOCATED 7
 
-void mkfs(void)
+void mkfs(void);
 
 #endif

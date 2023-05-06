@@ -1,4 +1,8 @@
+#include <unistd.h>
 #include "block.h"
+#include "image.h"
+#include "free.h"
+
 
 unsigned char *bread(int blocknum, unsigned char *block){
     lseek(image_fd, blocknum * BLOCK_SIZE, SEEK_SET);

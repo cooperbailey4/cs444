@@ -1,3 +1,5 @@
+#include <unistd.h>
+#include <fcntl.h>
 #include "image.h"
 
 int image_fd;

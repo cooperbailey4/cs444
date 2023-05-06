@@ -1,3 +1,4 @@
+#include "block.h"
 int find_low_clear_bit(unsigned char x)
 {
     for (int i = 0; i < 8; i++)
@@ -23,7 +24,7 @@ void set_free(unsigned char *block, int num, int set) {
 
 int find_free(unsigned char *block) {
     for (int i = 0; i < BLOCK_SIZE; i++) {
-        int clear_bit = find_low_clear_bit(block[i])
+        int clear_bit = find_low_clear_bit(block[i]);
         if (clear_bit != -1) {
             return i*8 + clear_bit;
         }
