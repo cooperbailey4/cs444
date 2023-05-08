@@ -1,4 +1,3 @@
-
 #include <stdio.h>
 #include <string.h>
 #include "image.h"
@@ -6,6 +5,7 @@
 #include "free.h"
 #include "ctest.h"
 #include "inode.h"
+#include "mkfs.h"
 
 int image(char *filename, int x) {
     image_open(filename, x);
@@ -31,8 +31,7 @@ void test_block_alloc(void) {
     unsigned char myChar = 255;
     unsigned char* block = &myChar;
     bwrite(block_num, block);
-    //don't know why but this returns 2, need to look into it
-    CTEST_ASSERT(alloc() == BLOCK_MAP, "ialloc finds and allocates block");
+    CTEST_ASSERT(alloc() == 1, "alloc finds and allocates a free block");
 }
 
 void test_free(void) {
@@ -48,7 +47,18 @@ void test_inode(void) {
     unsigned char myChar = 255;
     unsigned char* block = &myChar;
     bwrite(block_num, block);
-    CTEST_ASSERT(ialloc() == INODE_MAP, "ialloc finds and allocates block");
+    CTEST_ASSERT(ialloc() == 1, "ialloc finds and allocates a free block");
+}
+
+void test_mkfs(void){
+    unsigned char block[BLOCK_SIZE];
+    char *image = "image";
+    image_open(image, 0);
+    mkfs();
+    bread(BLOCK_MAP, block);
+    printf("%d", find_free(block));
+    CTEST_ASSERT(find_free(block) == 7, "free bit at 7 in block");
+
 }
 
 
@@ -60,6 +70,7 @@ int main(void){
     test_free();
     test_inode();
     test_block_alloc();
+    test_mkfs();
     CTEST_RESULTS();
     CTEST_EXIT();
 }

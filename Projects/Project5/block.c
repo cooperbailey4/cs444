@@ -10,8 +10,6 @@ unsigned char *bread(int blocknum, unsigned char *block){
 
     return block;
 }
-// bwrite(blocknum, block)
-// test memcmp(block == bread(blocknum, block));
 
 void bwrite(int blocknum, unsigned char *block){
     lseek(image_fd, blocknum*4096, SEEK_SET);
