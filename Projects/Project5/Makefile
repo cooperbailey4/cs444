@@ -17,7 +17,10 @@ inode.o: inode.c inode.h
 mkfs.o: mkfs.c mkfs.h
 	gcc -Wall -Wextra -c $<
 
-lib.a: image.o block.o free.o inode.o mkfs.o
+pack.o: pack.c pack.h
+	gcc -Wall -Wextra -c $<
+
+lib.a: image.o block.o free.o inode.o mkfs.o pack.o
 	ar rcs $@ $^
 
 .PHONY: test
