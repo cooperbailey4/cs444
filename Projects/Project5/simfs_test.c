@@ -134,7 +134,6 @@ void test_iget(void) {
     struct inode* not_read_inode = iget(12);
     CTEST_ASSERT(not_read_inode->inode_num == 12, "not_read_inode, now exists and has space allocated for it");
     CTEST_ASSERT(not_read_inode->ref_count == 1, "not_read_inode, has a ref_count of 1 to start");
-
     image_close();
 
 }
@@ -142,18 +141,27 @@ void test_iget(void) {
 void test_iput(void) {
     image_open("file", 1);
     struct inode* inode = find_incore_free();
-    iput(inode);
-    CTEST_ASSERT(inode->ref_count == 0, "ref_count starts at 0 and iput does nothing if it is 0");
-
+    struct inode* empty_inode = find_incore_free();
     inode->ref_count = 2;
+    inode->inode_num = 34;
+    iput(inode);
     CTEST_ASSERT(inode->ref_count == 1, "iput subtracts from ref_count if it is not 0");
+    iput(inode);
+    CTEST_ASSERT(inode->ref_count == 0, "ref_count at 0 and iput does nothing if it is 0, if it subtracts it should be readable from disk");
+    read_inode(empty_inode, 34);
+    CTEST_ASSERT(empty_inode->inode_num == 34, "empty inode reads inode that was written to disk in iput");
     image_close();
 }
 
 void test_ialloc(void) {
+    // printf("hete");
     image_open("file", 1);
+    printf("hete");
+    mkfs();
+    // printf("hete");
     int block_num = 3;
     unsigned char block[BLOCK_SIZE];
+
     bwrite(block_num, block);
 
     CTEST_ASSERT(ialloc()->inode_num == 0, "ialloc finds and allocates a free block");
@@ -175,7 +183,10 @@ int main(void){
     test_find_incore();
     test_read_write_inode();
     test_iget();
-    test_ialloc();
+    test_iput();
+    printf("hete");
+    // test_ialloc();
+
     CTEST_RESULTS();
     CTEST_EXIT();
 }

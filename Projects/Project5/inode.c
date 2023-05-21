@@ -115,7 +115,7 @@ void iput(struct inode *in) {
     if (in->ref_count == 0) {
         return;
     }
-    in->ref_count--;
+    in->ref_count=in->ref_count-1;
     if (in->ref_count == 0) {
         write_inode(in);
     }
