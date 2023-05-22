@@ -18,22 +18,24 @@ struct inode* ialloc(void) {
         set_free( block, free_bit, NON_FREE );
 
         bwrite( INODE_MAP, block );
-        return NULL;
-    }
-    struct inode* in_core = iget(free_bit);
-    if (in_core == NULL) {
-        return NULL;
-    }
-    in_core->size = 0;
-    in_core->owner_id = 0;
-    in_core->permissions = 0;
-    in_core->flags = 0;
-    for (int i = 0; i < INODE_PTR_COUNT; i++) {
-        in_core->block_ptr[i] = 0;
-    }
-    write_inode(in_core);
 
-    return in_core;
+        struct inode* in_core = iget(free_bit);
+        if (in_core == NULL) {
+            return NULL;
+        }
+        in_core->size = 0;
+        in_core->owner_id = 0;
+        in_core->permissions = 0;
+        in_core->flags = 0;
+        for (int i = 0; i < INODE_PTR_COUNT; i++) {
+            in_core->block_ptr[i] = 0;
+        }
+        write_inode(in_core);
+
+        return in_core;
+    }
+    return NULL;
+
 }
 
 struct inode *find_incore_free(void) {

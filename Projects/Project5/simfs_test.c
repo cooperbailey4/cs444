@@ -10,6 +10,14 @@
 
 #ifdef CTEST_ENABLE
 
+void fill_bitmap(unsigned int blocknum) {
+    unsigned char block[BLOCK_SIZE] = {0};
+    bread(blocknum, block);
+    memset(block, 0xFF, sizeof(block));
+    bwrite(blocknum, block);
+}
+
+
 void test_image(void) {
     image_open("file", 1);
     int image = image_close();
@@ -17,7 +25,15 @@ void test_image(void) {
 
 }
 
-void test_block(void) {
+
+void test_image_failure(void) {
+    image_open("/foo", 1);
+    int image = image_close();
+    CTEST_ASSERT(image == -1, "image_open and image_close are correct\n");
+}
+
+
+void test_block_read_write(void) {
     image_open("file", 1);
     unsigned char block[BLOCK_SIZE];
     int block_num = 3;
@@ -47,17 +63,6 @@ void test_free(void) {
     image_close();
 }
 
-// void test_inode(void) {
-//     image_open("file", 1);
-//     int block_num = 3;
-//     unsigned char block[BLOCK_SIZE];
-//     bwrite(block_num, block);
-
-//     CTEST_ASSERT(ialloc() == 0, "ialloc finds and allocates a free block");
-//     CTEST_ASSERT(ialloc() == 1, "ialloc finds and allocates a free block");
-
-//     image_close();
-// }
 
 void test_mkfs(void){
     unsigned char block[BLOCK_SIZE];
@@ -154,28 +159,35 @@ void test_iput(void) {
 }
 
 void test_ialloc(void) {
-    // printf("hete");
     image_open("file", 1);
-    // printf("hete");
-    // mkfs();
-    // printf("hete");
+    mkfs();
     int block_num = 3;
     unsigned char block[BLOCK_SIZE];
 
     bwrite(block_num, block);
+    struct inode* x = ialloc();
+    struct inode* y = ialloc();
 
-    CTEST_ASSERT(ialloc()->inode_num == 0, "ialloc finds and allocates a free block");
-    CTEST_ASSERT(ialloc()->inode_num == 1, "ialloc finds and allocates a free block");
+    CTEST_ASSERT(x->inode_num == 0, "ialloc finds and allocates a free block");
+    CTEST_ASSERT(y->inode_num == 1, "ialloc finds and allocates a free block");
 
     image_close();
 }
 
 
+void test_ialloc_failure(void) {
+    image_open("file", 1);
+    fill_bitmap(INODE_MAP);
+    CTEST_ASSERT(ialloc() == NULL, "");
+    image_close();
+}
+
 
 int main(void){
     CTEST_VERBOSE(1);
     test_image();
-    test_block();
+    test_image_failure();
+    test_block_read_write();
     test_block_alloc();
     test_free();
     test_mkfs();
@@ -186,6 +198,7 @@ int main(void){
     test_iput();
     // printf("hete");
     test_ialloc();
+    test_ialloc_failure();
 
     CTEST_RESULTS();
     CTEST_EXIT();
