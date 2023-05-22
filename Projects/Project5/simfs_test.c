@@ -156,8 +156,8 @@ void test_iput(void) {
 void test_ialloc(void) {
     // printf("hete");
     image_open("file", 1);
-    printf("hete");
-    mkfs();
+    // printf("hete");
+    // mkfs();
     // printf("hete");
     int block_num = 3;
     unsigned char block[BLOCK_SIZE];
@@ -184,8 +184,8 @@ int main(void){
     test_read_write_inode();
     test_iget();
     test_iput();
-    printf("hete");
-    // test_ialloc();
+    // printf("hete");
+    test_ialloc();
 
     CTEST_RESULTS();
     CTEST_EXIT();
