@@ -10,6 +10,7 @@
 
 #ifdef CTEST_ENABLE
 
+// Helper Functions
 void fill_bitmap(unsigned int blocknum) {
     unsigned char block[BLOCK_SIZE] = {0};
     bread(blocknum, block);
@@ -18,18 +19,19 @@ void fill_bitmap(unsigned int blocknum) {
 }
 
 
+// Test functions
 void test_image(void) {
     image_open("file", 1);
     int image = image_close();
     CTEST_ASSERT(image == 0, "image_open and image_close are correct\n");
-
+    image_close();
 }
-
 
 void test_image_failure(void) {
     image_open("/foo", 1);
     int image = image_close();
     CTEST_ASSERT(image == -1, "image_open and image_close are correct\n");
+    image_close();
 }
 
 
@@ -42,6 +44,21 @@ void test_block_read_write(void) {
     image_close();
 }
 
+void test_block_read_write_failure(void) {
+    image_open("file", 1);
+    unsigned char block[BLOCK_SIZE];
+    int block_num = 9000;  // Invalid block number
+
+    // Attempt to write the block
+    bwrite(block_num, block);
+
+    // Attempt to read the block and check for failure
+    unsigned char *result = bread(block_num, block);
+    printf("%p", result);
+    CTEST_ASSERT(result == NULL, "Block read failed as expected");
+
+    image_close();
+}
 
 void test_block_alloc(void) {
     image_open("file", 1);
@@ -53,6 +70,15 @@ void test_block_alloc(void) {
 
     image_close();
 }
+
+void test_block_alloc_failure(void) {
+    unsigned char block[BLOCK_SIZE]; // Assuming BLOCK_SIZE is defined
+
+    // Test failure of bread function
+    unsigned char *result = bread(-1, block);  // Invalid block number
+    CTEST_ASSERT( result == NULL, "bread returns null when there is an invalid block number");
+}
+
 
 void test_free(void) {
     image_open("file", 1);
@@ -160,7 +186,6 @@ void test_iput(void) {
 
 void test_ialloc(void) {
     image_open("file", 1);
-    mkfs();
     int block_num = 3;
     unsigned char block[BLOCK_SIZE];
 
@@ -169,7 +194,7 @@ void test_ialloc(void) {
     struct inode* y = ialloc();
 
     CTEST_ASSERT(x->inode_num == 0, "ialloc finds and allocates a free block");
-    CTEST_ASSERT(y->inode_num == 1, "ialloc finds and allocates a free block");
+    CTEST_ASSERT(y->inode_num == 1, "ialloc finds and allocates a free block, that goes up by one every call");
 
     image_close();
 }
@@ -178,15 +203,16 @@ void test_ialloc(void) {
 void test_ialloc_failure(void) {
     image_open("file", 1);
     fill_bitmap(INODE_MAP);
-    CTEST_ASSERT(ialloc() == NULL, "");
+    CTEST_ASSERT(ialloc() == NULL, "ialloc will fail if there is no more available space in the INODE_MAP");
     image_close();
 }
 
 
 int main(void){
     CTEST_VERBOSE(1);
+
+    // Success Tests
     test_image();
-    test_image_failure();
     test_block_read_write();
     test_block_alloc();
     test_free();
@@ -196,9 +222,15 @@ int main(void){
     test_read_write_inode();
     test_iget();
     test_iput();
-    // printf("hete");
     test_ialloc();
+
+    // Failure Tests
+    test_image_failure();
+    test_block_read_write_failure();
+
+
     test_ialloc_failure();
+
 
     CTEST_RESULTS();
     CTEST_EXIT();

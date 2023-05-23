@@ -6,9 +6,15 @@
 
 
 unsigned char *bread(int blocknum, unsigned char *block){
-    lseek(image_fd, blocknum * BLOCK_SIZE, SEEK_SET);
-    if (read(image_fd, block, BLOCK_SIZE) == -1) {
+    int leek = lseek(image_fd, blocknum * BLOCK_SIZE, SEEK_SET);
+    if(leek == -1){
+        perror("null read");
+        return NULL;
+    }
+    printf("%d", blocknum * BLOCK_SIZE);
+    if (read(image_fd, block, BLOCK_SIZE) != BLOCK_SIZE) {
         perror("read failed");
+        return NULL;
     }
 
     return block;
