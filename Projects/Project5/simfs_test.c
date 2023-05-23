@@ -47,7 +47,7 @@ void test_block_read_write(void) {
 void test_block_read_write_failure(void) {
     image_open("file", 1);
     unsigned char block[BLOCK_SIZE];
-    int block_num = 9000;  // Invalid block number
+    int block_num = 90000;  // Invalid block number
 
     // Attempt to write the block
     bwrite(block_num, block);

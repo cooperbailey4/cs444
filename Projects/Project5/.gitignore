@@ -1,0 +1,4 @@
+*.o
+*.a
+simfs_test
+
