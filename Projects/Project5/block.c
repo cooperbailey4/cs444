@@ -8,12 +8,16 @@
 unsigned char *bread(int blocknum, unsigned char *block){
     int leek = lseek(image_fd, blocknum * BLOCK_SIZE, SEEK_SET);
     if(leek == -1){
-        perror("null read");
+        perror("null read\n");
         return NULL;
     }
-    printf("%d", blocknum * BLOCK_SIZE);
-    if (read(image_fd, block, BLOCK_SIZE) != BLOCK_SIZE) {
-        perror("read failed");
+    int readint = read(image_fd, block, BLOCK_SIZE);
+    if (readint == -1) {
+        perror("read failed\n");
+        return NULL;
+    }
+    if (readint != BLOCK_SIZE) {
+
         return NULL;
     }
 
@@ -21,16 +25,16 @@ unsigned char *bread(int blocknum, unsigned char *block){
 }
 
 void bwrite(int blocknum, unsigned char *block){
-    lseek(image_fd, blocknum*4096, SEEK_SET);
+    lseek(image_fd, blocknum*BLOCK_SIZE, SEEK_SET);
     if (write(image_fd, block, BLOCK_SIZE) == -1) {
-        perror("write failed");
+        perror("write failed\n");
     }
 }
 
 int alloc(void) {
     unsigned char block[BLOCK_SIZE];
 
-
+    
     bread( BLOCK_MAP, block );
 
     int free_bit = find_free( block );
@@ -39,6 +43,7 @@ int alloc(void) {
         set_free( block, free_bit, NON_FREE );
 
         bwrite( BLOCK_MAP, block );
+
     }
 
     return free_bit;

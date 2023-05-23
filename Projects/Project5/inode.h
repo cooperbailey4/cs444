@@ -26,6 +26,8 @@ struct inode {
     unsigned int inode_num;
 };
 
+void fill_incore(void);
+
 struct inode* ialloc(void);
 struct inode *find_incore_free(void);
 struct inode *find_incore(unsigned int inode_num);

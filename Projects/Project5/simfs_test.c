@@ -12,8 +12,7 @@
 
 // Helper Functions
 void fill_bitmap(unsigned int blocknum) {
-    unsigned char block[BLOCK_SIZE] = {0};
-    bread(blocknum, block);
+    unsigned char block[BLOCK_SIZE];
     memset(block, 0xFF, sizeof(block));
     bwrite(blocknum, block);
 }
@@ -27,13 +26,6 @@ void test_image(void) {
     image_close();
 }
 
-void test_image_failure(void) {
-    image_open("/foo", 1);
-    int image = image_close();
-    CTEST_ASSERT(image == -1, "image_open and image_close are correct\n");
-    image_close();
-}
-
 
 void test_block_read_write(void) {
     image_open("file", 1);
@@ -44,21 +36,6 @@ void test_block_read_write(void) {
     image_close();
 }
 
-void test_block_read_write_failure(void) {
-    image_open("file", 1);
-    unsigned char block[BLOCK_SIZE];
-    int block_num = 90000;  // Invalid block number
-
-    // Attempt to write the block
-    bwrite(block_num, block);
-
-    // Attempt to read the block and check for failure
-    unsigned char *result = bread(block_num, block);
-    printf("%p", result);
-    CTEST_ASSERT(result == NULL, "Block read failed as expected");
-
-    image_close();
-}
 
 void test_block_alloc(void) {
     image_open("file", 1);
@@ -69,14 +46,6 @@ void test_block_alloc(void) {
     CTEST_ASSERT(alloc() == 1, "alloc finds and allocates a free block");
 
     image_close();
-}
-
-void test_block_alloc_failure(void) {
-    unsigned char block[BLOCK_SIZE]; // Assuming BLOCK_SIZE is defined
-
-    // Test failure of bread function
-    unsigned char *result = bread(-1, block);  // Invalid block number
-    CTEST_ASSERT( result == NULL, "bread returns null when there is an invalid block number");
 }
 
 
@@ -100,6 +69,7 @@ void test_mkfs(void){
     image_close();
 }
 
+
 void test_find_incore_free(void) {
     char *image = "image";
     image_open(image, 0);
@@ -108,6 +78,7 @@ void test_find_incore_free(void) {
     CTEST_ASSERT(inode->inode_num == 0, "found free incore inode");
     image_close();
 }
+
 
 void test_find_incore(void) {
     char *image = "image";
@@ -123,6 +94,7 @@ void test_find_incore(void) {
     CTEST_ASSERT(memcmp(find_incore(612), inode, sizeof(struct inode)) == 0, "found the correct inode");
     image_close();
 }
+
 
 void test_read_write_inode(void) {
     image_open("file", 1);
@@ -184,6 +156,7 @@ void test_iput(void) {
     image_close();
 }
 
+
 void test_ialloc(void) {
     image_open("file", 1);
     int block_num = 3;
@@ -197,6 +170,64 @@ void test_ialloc(void) {
     CTEST_ASSERT(y->inode_num == 1, "ialloc finds and allocates a free block, that goes up by one every call");
 
     image_close();
+}
+
+
+// Failure testing
+
+void test_image_failure(void) {
+    image_open("/foo", 1);
+    int image = image_close();
+    CTEST_ASSERT(image == -1, "image_open and image_close are correct\n");
+    image_close();
+}
+
+
+void test_block_read_failure(void) {
+    image_open("file", 1);
+    unsigned char block[BLOCK_SIZE];
+    int block_num = 90000;  // Invalid block number
+
+    // Attempt to read the block and check for failure
+    unsigned char *result = bread(block_num, block);
+    CTEST_ASSERT(result == NULL, "Block read failed as expected");
+
+    image_close();
+}
+
+
+void test_block_alloc_failure(void) {
+    image_open("file", 1);
+    fill_bitmap(BLOCK_MAP);
+
+    CTEST_ASSERT( alloc() == -1, "alloc returns -1 when there is no way to allocate a block");
+    image_close();
+}
+
+
+void test_free_failure(void) {
+    image_open("file", 1);
+    fill_bitmap(BLOCK_MAP);
+    unsigned char block[BLOCK_SIZE];
+    bread( BLOCK_MAP, block );
+    CTEST_ASSERT(find_free(block) == -1, "cannot find a free block, so it returns -1");
+    image_close();
+}
+
+void test_find_incore_free_failure() {
+    fill_incore();
+    CTEST_ASSERT(find_incore_free() == NULL, "No more space incore so there are no more free incore inodes");
+}
+
+
+void test_find_incore_failure() {
+    CTEST_ASSERT(find_incore(2023) == NULL, "No more space incore so there are no more free incore inodes");
+}
+
+
+void test_iget_failure(void) {
+    fill_incore();
+    CTEST_ASSERT(iget(4134) == NULL, "Can't get a new incore inode if they are all taken");
 }
 
 
@@ -226,9 +257,12 @@ int main(void){
 
     // Failure Tests
     test_image_failure();
-    test_block_read_write_failure();
-
-
+    test_block_read_failure();
+    test_block_alloc_failure();
+    test_free_failure();
+    test_find_incore_free_failure();
+    test_find_incore_failure();
+    test_iget_failure();
     test_ialloc_failure();
 
 

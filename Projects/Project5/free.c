@@ -19,7 +19,6 @@ void set_free(unsigned char *block, int num, int set) {
         block[byte_num] &= ~(1 << bit_num);
     }
 
-
 }
 
 int find_free(unsigned char *block) {

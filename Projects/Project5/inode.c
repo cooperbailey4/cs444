@@ -6,6 +6,15 @@
 
 static struct inode incore[MAX_SYS_OPEN_FILES] = {0};
 
+// helper functions
+void fill_incore(void) {
+    for (int i = 0; i < MAX_SYS_OPEN_FILES; i++) {
+        incore[i].ref_count = 1;
+    }
+}
+
+// main functions
+
 struct inode* ialloc(void) {
     unsigned char block[BLOCK_SIZE];
 
