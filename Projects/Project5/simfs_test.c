@@ -7,6 +7,8 @@
 #include "inode.h"
 #include "mkfs.h"
 #include "pack.h"
+#include "dir.h"
+#include "ls.h"
 
 #ifdef CTEST_ENABLE
 
@@ -65,7 +67,7 @@ void test_mkfs(void){
     image_open(image, 0);
     mkfs();
     bread(BLOCK_MAP, block);
-    CTEST_ASSERT(find_free(block) == 7, "free bit at 7 in block");
+    CTEST_ASSERT(find_free(block) == 8, "free bit at 7 in block");
     image_close();
 }
 
@@ -121,6 +123,7 @@ void test_read_write_inode(void) {
 
 }
 
+
 void test_iget(void) {
     image_open("file", 1);
     struct inode* new_inode = find_incore_free();
@@ -140,6 +143,7 @@ void test_iget(void) {
     image_close();
 
 }
+
 
 void test_iput(void) {
     image_open("file", 1);
@@ -169,6 +173,13 @@ void test_ialloc(void) {
     CTEST_ASSERT(x->inode_num == 0, "ialloc finds and allocates a free block");
     CTEST_ASSERT(y->inode_num == 1, "ialloc finds and allocates a free block, that goes up by one every call");
 
+    image_close();
+}
+
+void test_ls(void) {
+    image_open("file", 0);
+    mkfs();
+    ls(); // just prints out 0 and 0 for the current and parent directory's
     image_close();
 }
 
@@ -214,13 +225,14 @@ void test_free_failure(void) {
     image_close();
 }
 
-void test_find_incore_free_failure() {
+
+void test_find_incore_free_failure(void) {
     fill_incore();
     CTEST_ASSERT(find_incore_free() == NULL, "No more space incore so there are no more free incore inodes");
 }
 
 
-void test_find_incore_failure() {
+void test_find_incore_failure(void) {
     CTEST_ASSERT(find_incore(2023) == NULL, "No more space incore so there are no more free incore inodes");
 }
 
@@ -239,6 +251,8 @@ void test_ialloc_failure(void) {
 }
 
 
+
+
 int main(void){
     CTEST_VERBOSE(1);
 
@@ -254,6 +268,7 @@ int main(void){
     test_iget();
     test_iput();
     test_ialloc();
+    // test_ls();
 
     // Failure Tests
     test_image_failure();
@@ -265,9 +280,12 @@ int main(void){
     test_iget_failure();
     test_ialloc_failure();
 
+    test_ls();
 
     CTEST_RESULTS();
     CTEST_EXIT();
+
+
 }
 
 #endif

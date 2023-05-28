@@ -14,13 +14,19 @@ free.o: free.c free.h
 inode.o: inode.c inode.h
 	gcc -Wall -Wextra -c $<
 
+dir.o: dir.c dir.h
+	gcc -Wall -Wextra -c $<
+
+ls.o: ls.c ls.h
+	gcc -Wall -Wextra -c $<
+
 mkfs.o: mkfs.c mkfs.h
 	gcc -Wall -Wextra -c $<
 
 pack.o: pack.c pack.h
 	gcc -Wall -Wextra -c $<
 
-lib.a: image.o block.o free.o inode.o mkfs.o pack.o
+lib.a: image.o block.o free.o inode.o dir.o ls.o mkfs.o pack.o
 	ar rcs $@ $^
 
 .PHONY: test
