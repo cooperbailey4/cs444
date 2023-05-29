@@ -40,7 +40,7 @@ int directory_get(struct directory *dir, struct directory_entry *ent) {
     struct directory_entry *entry = (struct directory_entry *)(block + offset_in_block);
 
     ent->inode_num = read_u16(&(entry->inode_num));
-    strcpy(ent->name, (char *)(block + offset_in_block + 2));
+    strcpy(ent->name, (char *)(block + offset_in_block + DIRECTORY_ENTRY_FILE_NAME_OFFSET));
 
     dir->offset += DIRECTORY_ENTRY_SIZE;
 
