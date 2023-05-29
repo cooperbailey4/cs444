@@ -6,6 +6,7 @@
 #include "inode.h"
 #include "block.h"
 #include "pack.h"
+#include "mkfs.h"
 
 
 struct directory *directory_open(int inode_num) {
@@ -39,9 +40,9 @@ int directory_get(struct directory *dir, struct directory_entry *ent) {
     struct directory_entry *entry = (struct directory_entry *)(block + offset_in_block);
 
     ent->inode_num = read_u16(&(entry->inode_num));
-    strcpy(ent->name, entry->name);
+    strcpy(ent->name, (char *)(block + offset_in_block + 2));
 
-    dir->offset += sizeof(struct directory_entry);
+    dir->offset += DIRECTORY_ENTRY_SIZE;
 
     return 0;
 }

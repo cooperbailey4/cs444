@@ -10,7 +10,6 @@ void ls(void)
     struct directory_entry ent;
 
     dir = directory_open(0);
-    printf("%s\n", ent.name);
     while (directory_get(dir, &ent) != -1) {
 
         printf("%d %s\n", ent.inode_num, ent.name);

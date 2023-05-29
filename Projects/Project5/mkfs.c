@@ -7,19 +7,6 @@
 #include "pack.h"
 #include <stdio.h>
 
-#define DIRECTORY_ENTRY_INODE_NUM_OFFSET 0
-#define DIRECTORY_ENTRY_FILE_NAME_OFFSET 2
-#define DIRECTORY_ENTRY_RESERVED_OFFSET 18
-
-#define DIRECTORY_ENTRY_SIZE 32
-#define ROOT_DIRECTORY_SIZE DIRECTORY_ENTRY_SIZE*2
-
-#define INODE_FLAG_UNKNOWN_TYPE 0
-#define INODE_FLAG_REGULAR_FILE 1
-#define INODE_FLAG_FILE_ISA_DIR 2
-
-#define ROOT_DIRECTORY_INODE_NUM 0
-
 void mkfs(void) {
 
     // Setup
@@ -52,7 +39,6 @@ void mkfs(void) {
     ent_num = 1;
 
     write_u16(block + DIRECTORY_ENTRY_SIZE * ent_num + DIRECTORY_ENTRY_INODE_NUM_OFFSET, ROOT_DIRECTORY_INODE_NUM);
-
     strcpy((char*)(block + DIRECTORY_ENTRY_SIZE * ent_num + DIRECTORY_ENTRY_FILE_NAME_OFFSET), "..");
 
     bwrite(directory_block_num, block);
