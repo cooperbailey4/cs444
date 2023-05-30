@@ -178,22 +178,21 @@ void test_ialloc(void) {
 
 void test_dir_open(void) {
     image_open("file", 0);
+    mkfs();
     struct directory* dir = directory_open(99);
     CTEST_ASSERT(dir->inode->inode_num == 99, "directory open correctly assigns the inode num to the inode in the directory");
     CTEST_ASSERT(dir->offset == 0, "directory offset starts at 0");
-    // printf("%d\n", dir->inode->ref_count);
-
-    // directory_close(dir);
-    // printf("%d\n", dir->inode->ref_count);
-    // Don't know if I can do this because dir is freed in directory_close
-    // CTEST_ASSERT(dir->inode->ref_count == 0, "ref_count is subtracted from when directory is closed, if there are no other references to the inode, it should be 0");
-    // CTEST_ASSERT(directory_get())
+    struct inode *in = dir->inode;
 
     directory_close(dir);
+    CTEST_ASSERT(in->ref_count == 0, "ref_count is subtracted from when directory is closed, if there are no other references to the inode, it should be 0");
+
     image_close();
 }
 
 void test_dir_get(void) {
+    image_open("file", 0);
+    mkfs();
     struct directory *dir;
 
     struct directory_entry ent;
@@ -202,6 +201,7 @@ void test_dir_get(void) {
     CTEST_ASSERT(directory_get(dir, &ent) == 0, "directory_get returns 0 upon successful completion");
     directory_get(dir, &ent);
     CTEST_ASSERT(directory_get(dir, &ent) == -1, "directory_get returns -1 when therer are no more entries to get in the directory");
+    image_close();
 }
 
 void test_ls(void) {
@@ -286,7 +286,19 @@ void test_dir_open_failure(void) {
     image_close();
 }
 
+void test_dir_get_failure(void) {
+    image_open("file", 0);
+    mkfs();
+    struct directory *dir;
 
+    struct directory_entry ent;
+
+    dir = directory_open(0);
+    directory_get(dir, &ent);
+    directory_get(dir, &ent);
+    CTEST_ASSERT(directory_get(dir, &ent) == -1, "directory_get returns -1 when there are no more entries to get in the directory");
+    image_close();
+}
 
 
 int main(void){
@@ -305,6 +317,7 @@ int main(void){
     test_iput();
     test_ialloc();
     test_dir_open();
+    test_dir_get();
 
     // Failure Tests
     test_image_failure();
@@ -316,8 +329,8 @@ int main(void){
     test_iget_failure();
     test_ialloc_failure();
     test_dir_open_failure();
+    test_dir_get_failure();
 
-    test_dir_get();
 
     test_ls();
 

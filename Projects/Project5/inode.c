@@ -3,6 +3,7 @@
 #include "inode.h"
 #include "pack.h"
 #include <stddef.h>
+#include <string.h>
 
 static struct inode incore[MAX_SYS_OPEN_FILES] = {0};
 
@@ -11,6 +12,11 @@ void fill_incore(void) {
     for (int i = 0; i < MAX_SYS_OPEN_FILES; i++) {
         incore[i].ref_count = 1;
     }
+}
+
+void clear_incore_inodes(void)
+{
+    memset(incore, 0, sizeof incore);
 }
 
 // main functions

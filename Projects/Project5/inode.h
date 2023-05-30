@@ -27,6 +27,7 @@ struct inode {
 };
 
 void fill_incore(void);
+void clear_incore_inodes(void);
 
 struct inode* ialloc(void);
 struct inode *find_incore_free(void);
