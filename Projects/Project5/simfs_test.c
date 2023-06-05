@@ -215,10 +215,7 @@ void test_namei(void) {
 void test_directory_make(void) {
     image_open("file", 1);
     mkfs();
-    directory_open(1);
-    ls();
-    CTEST_ASSERT(directory_make("/fo") == 0, "directory is made and returns 0");
-
+    CTEST_ASSERT(directory_make("/foo") == 0, "directory is made and returns 0");
     image_close();
 }
 
@@ -318,6 +315,17 @@ void test_dir_get_failure(void) {
     image_close();
 }
 
+void test_directory_make_failure(void) {
+    image_open("file", 1);
+    mkfs();
+    CTEST_ASSERT(directory_make("foo") == -1, "directory is not made and returns -1, when there is no slash at the front");
+    CTEST_ASSERT(directory_make("/foo/bar") == -1, "directory is not made and returns -1, when the parent doesn't exist");
+
+    image_close();
+}
+
+
+
 
 int main(void){
     CTEST_VERBOSE(1);
@@ -351,6 +359,7 @@ int main(void){
     test_dir_get_failure();
 
     test_directory_make();
+    test_directory_make_failure();
     test_ls();
 
     CTEST_RESULTS();

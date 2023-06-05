@@ -125,16 +125,13 @@ int directory_make(char *path) {
     char parentname[1024];
 
     // get parent path name before dirname
-    char* parent_path = get_dirname(path, dirname);
+    char* parent_path = get_dirname(path, parentname);
 
     // get directory name without parent path
-    char* dir_name = get_basename(path, parentname);
+    char* dir_name = get_basename(path, dirname);
 
 
     // get inode of parent path
-    printf("\n");
-    printf("%s", parent_path);
-    printf("%s", dir_name);
     struct inode* parent_inode = namei(parent_path);
 
     if (parent_inode == NULL) {
@@ -163,18 +160,24 @@ int directory_make(char *path) {
     write_u16(block + DIRECTORY_ENTRY_SIZE * ent_num + DIRECTORY_ENTRY_INODE_NUM_OFFSET, ROOT_DIRECTORY_INODE_NUM);
     strcpy((char*)(block + DIRECTORY_ENTRY_SIZE * ent_num + DIRECTORY_ENTRY_FILE_NAME_OFFSET), "..");
 
-    ent_num = 2;
-    printf("%d", new_inode_num);
+    bwrite(new_directory_block_num, block);
+    int block_ptr_index = parent_inode->size / BLOCK_SIZE;
+    bread(parent_inode->block_ptr[block_ptr_index], block);
+
+
+    int offset = parent_inode->size % BLOCK_SIZE;
+    ent_num = offset / DIRECTORY_ENTRY_SIZE;
+
+    parent_inode->size += DIRECTORY_ENTRY_SIZE;
+
+
     write_u16(block + DIRECTORY_ENTRY_SIZE * ent_num + DIRECTORY_ENTRY_INODE_NUM_OFFSET, new_inode_num);
     strcpy((char*)(block + DIRECTORY_ENTRY_SIZE * ent_num + DIRECTORY_ENTRY_FILE_NAME_OFFSET), dirname);
 
-    bwrite(new_directory_block_num, block);
+    bwrite(parent_inode->block_ptr[block_ptr_index], block);
 
     iput(new_inode);
 
-
-
-    parent_inode->size = DIRECTORY_ENTRY_SIZE * ent_num;
 
     iput(parent_inode);
 
