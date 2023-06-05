@@ -204,6 +204,24 @@ void test_dir_get(void) {
     image_close();
 }
 
+void test_namei(void) {
+    image_open("file", 1);
+    mkfs();
+    CTEST_ASSERT(namei("/")->inode_num == 0, "namei returns root directory inode for the root");
+
+    image_close();
+}
+
+void test_directory_make(void) {
+    image_open("file", 1);
+    mkfs();
+    directory_open(1);
+    ls();
+    CTEST_ASSERT(directory_make("/fo") == 0, "directory is made and returns 0");
+
+    image_close();
+}
+
 void test_ls(void) {
     image_open("file", 0);
     mkfs();
@@ -318,6 +336,7 @@ int main(void){
     test_ialloc();
     test_dir_open();
     test_dir_get();
+    test_namei();
 
     // Failure Tests
     test_image_failure();
@@ -331,7 +350,7 @@ int main(void){
     test_dir_open_failure();
     test_dir_get_failure();
 
-
+    test_directory_make();
     test_ls();
 
     CTEST_RESULTS();
